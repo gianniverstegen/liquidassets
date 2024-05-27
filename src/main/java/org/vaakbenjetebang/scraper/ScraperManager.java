@@ -32,9 +32,11 @@ public class ScraperManager {
 
     }
 
-    public void start() throws ExecutionException, InterruptedException {
+    public List<WhiskyProduct> start() throws ExecutionException, InterruptedException {
         long startTime = System.currentTimeMillis();
+
         List<WhiskyProduct> whiskyProducts = new ArrayList<>();
+
         List<Element> gallWhiskyElements = gallWhiskyScraper.scrape();
         List<WhiskyProduct> gallWhiskyProducts = gallWhiskyProcessor.process(gallWhiskyElements);
         whiskyProducts.addAll(gallWhiskyProducts);
@@ -45,6 +47,9 @@ public class ScraperManager {
 
         long endTime = System.currentTimeMillis();
         long timeTaken = (endTime - startTime) / 1000;
+
         log.info("Successfully scraped and processed {} items. Took ~{} seconds.", whiskyProducts.size(), timeTaken);
+
+        return whiskyProducts;
     }
 }
