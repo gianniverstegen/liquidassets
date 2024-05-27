@@ -3,6 +3,7 @@ package org.vaakbenjetebang.search;
 import org.junit.Test;
 import org.vaakbenjetebang.model.WhiskyProduct;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -18,7 +19,7 @@ public class WhiskySuffixTrieTest {
         // given
         WhiskySuffixTrie suffixTrie = new WhiskySuffixTrie();
 
-        List<WhiskyProduct> whiskyProducts = getWhiskyProducts();
+        List<WhiskyProduct> whiskyProducts = getWhiskyProducts(List.of(FIRST_WHISKY, SECOND_WHISKY, THIRD_WHISKY));
 
         suffixTrie.addAll(whiskyProducts);
 
@@ -31,7 +32,7 @@ public class WhiskySuffixTrieTest {
         // given
         WhiskySuffixTrie suffixTrie = new WhiskySuffixTrie();
 
-        List<WhiskyProduct> whiskyProducts = getWhiskyProducts();
+        List<WhiskyProduct> whiskyProducts = getWhiskyProducts(List.of(FIRST_WHISKY, SECOND_WHISKY, THIRD_WHISKY));
 
         suffixTrie.addAll(whiskyProducts);
 
@@ -45,7 +46,7 @@ public class WhiskySuffixTrieTest {
         // given
         WhiskySuffixTrie suffixTrie = new WhiskySuffixTrie();
 
-        List<WhiskyProduct> whiskyProducts = getWhiskyProducts();
+        List<WhiskyProduct> whiskyProducts = getWhiskyProducts(List.of(FIRST_WHISKY, SECOND_WHISKY, THIRD_WHISKY));
 
         suffixTrie.addAll(whiskyProducts);
 
@@ -53,17 +54,28 @@ public class WhiskySuffixTrieTest {
         assertThat(result).isEmpty();
     }
 
-    private List<WhiskyProduct> getWhiskyProducts() {
-        WhiskyProduct whisky1 = new WhiskyProduct();
-        whisky1.setName(FIRST_WHISKY);
+    @Test
+    public void shouldReturnTwoObjectsIfNamesAreTheSame() {
+        // given
+        WhiskySuffixTrie suffixTrie = new WhiskySuffixTrie();
 
-        WhiskyProduct whisky2 = new WhiskyProduct();
-        whisky2.setName(SECOND_WHISKY);
+        List<WhiskyProduct> whiskyProducts = getWhiskyProducts(List.of(FIRST_WHISKY, FIRST_WHISKY));
 
-        WhiskyProduct whisky3 = new WhiskyProduct();
-        whisky3.setName(THIRD_WHISKY);
+        suffixTrie.addAll(whiskyProducts);
 
-        return List.of(whisky1, whisky2, whisky3);
+        List<WhiskyProduct> result = suffixTrie.search("a very");
+        assertThat(result).hasSize(2).extracting(WhiskyProduct::getName).containsExactlyInAnyOrderElementsOf(List.of(FIRST_WHISKY, FIRST_WHISKY));
+    }
+
+    private List<WhiskyProduct> getWhiskyProducts(List<String> names) {
+        List<WhiskyProduct> whiskies = new ArrayList<>();
+
+        for (String name : names) {
+            WhiskyProduct whisky = new WhiskyProduct();
+            whisky.setName(name);
+            whiskies.add(whisky);
+        }
+        return whiskies;
     }
 
 
