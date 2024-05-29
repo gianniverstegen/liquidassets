@@ -13,11 +13,13 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.vaakbenjetebang.model.GallWhiskyProduct;
+import org.vaakbenjetebang.model.QueueItem;
 import org.vaakbenjetebang.scraper.Scraper;
 
 import javax.inject.Inject;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
 
 
 public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
@@ -40,7 +42,7 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
     }
 
     @Override
-    public List<WebElement> scrape() throws InterruptedException {
+    public void scrape(BlockingQueue<QueueItem<WebElement>> outputQueue) {
         long startTime = System.currentTimeMillis();
         driver.get(URL);
         Wait<WebDriver> wait = new WebDriverWait(driver, Duration.ofSeconds(2));
@@ -63,7 +65,11 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
             oldSize = articles.size();
 
             actions.sendKeys(Keys.END).perform();
-            Thread.sleep(MS_TO_SLEEP);
+            try {
+                Thread.sleep(MS_TO_SLEEP);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
 
             List<WebElement> allCurrentVisibleArticles = driver.findElements(WHISKY_PRODUCT_IDENTIFIER);
             articles.addAll(allCurrentVisibleArticles);

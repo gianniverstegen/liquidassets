@@ -7,12 +7,14 @@ import org.apache.logging.log4j.Logger;
 import org.jsoup.nodes.Attributes;
 import org.jsoup.nodes.Element;
 import org.vaakbenjetebang.model.GallWhiskyProduct;
+import org.vaakbenjetebang.model.QueueItem;
 import org.vaakbenjetebang.model.WhiskyProduct;
 import org.vaakbenjetebang.scraper.Processor;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 
 public class GallWhiskyProcessor implements Processor<Element> {
     private final static Logger log = LogManager.getLogger();
@@ -22,7 +24,7 @@ public class GallWhiskyProcessor implements Processor<Element> {
     public GallWhiskyProcessor() {}
 
     @Override
-    public List<WhiskyProduct> process(List<Element> elements) {
+    public List<WhiskyProduct> process(BlockingQueue<QueueItem<Element>> elements) {
         long startTime = System.currentTimeMillis();
         List<WhiskyProduct> whiskyProducts = new ArrayList<>();
         for (Element element : elements) {
