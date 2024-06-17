@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
 
-public class DrankDozijnWhiskyProcessor implements Processor<WebElement> {
+public class DrankDozijnWhiskyProcessor extends Processor<WebElement> {
 
     private final static Logger log = LogManager.getLogger();
 
@@ -24,61 +24,12 @@ public class DrankDozijnWhiskyProcessor implements Processor<WebElement> {
     public DrankDozijnWhiskyProcessor() {}
 
     @Override
-    public List<WhiskyProduct> process(BlockingQueue<QueueItem<WebElement>> inputQueue) {
-        long startTime = System.currentTimeMillis();
-        List<WhiskyProduct> whiskyProducts = new ArrayList<>();
-        boolean running = true;
-        try {
-            while (running) {
-                QueueItem<WebElement> item = inputQueue.take();
-
-                if (item.isSentinel()) {
-                    running = false;
-                    continue;
-                }
-                processItem(item.getItem()).ifPresent(whiskyProducts::add);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
-
-        long endTime = System.currentTimeMillis();
-        log.info("Took ~" + ((endTime - startTime) / 1000) + " seconds to process DrankDozijn's entries.");
-        return whiskyProducts;
-    }
-
-    private static Optional<WhiskyProduct> processItem(WebElement element) {
+    public Optional<WhiskyProduct> processItem(WebElement element) {
         String name = element.findElement(By.className("card-title")).getText();
         List<WebElement> priceInfo = element.findElements(By.className("price_group"));
 
         String[] prices = priceInfo.getFirst().getText().split("\n");
 
-        WhiskyProduct whiskyProduct = new WhiskyProduct();
-
-        whiskyProduct.setName(name);
-        whiskyProduct.setWebsite(Website.DRANKDOZIJN);
-
-        try {
-            String originalPriceAsString = prices[0].replace("€", "").replace(",", ".");
-            double originalPrice = Double.parseDouble(originalPriceAsString);
-
-            String discountedPriceAsString = prices[1].replace("€", "").replace(",", ".");
-            double discountedPrice = Double.parseDouble(discountedPriceAsString);
-
-            whiskyProduct.setPrice(originalPrice);
-            whiskyProduct.setDiscountedPrice(discountedPrice);
-
-            whiskyProduct.setDiscount(originalPrice - discountedPrice);
-        } catch (NumberFormatException e) {
-            log.error(e);
-            return Optional.empty();
-        }
-
-
-        return Optional.of(whiskyProduct);
-    }
-
-    private static Optional<WhiskyProduct> getWhiskyProduct(String[] prices, String name) {
         WhiskyProduct whiskyProduct = new WhiskyProduct();
 
         whiskyProduct.setName(name);

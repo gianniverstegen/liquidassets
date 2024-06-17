@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vaakbenjetebang.model.QueueItem;
 import org.vaakbenjetebang.scraper.Scraper;
 
 import org.apache.logging.log4j.LogManager;
@@ -15,6 +16,8 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -28,8 +31,7 @@ public class GallWhiskyScraper implements Scraper<Element> {
     public GallWhiskyScraper() {}
 
     @Override
-    public List<Element> scrape() throws InterruptedException, ExecutionException {
-        List<Element> whiskyElements = new ArrayList<>();
+    public void scrape(BlockingQueue<QueueItem<Element>> outputQueue) {
         long startTime = System.currentTimeMillis();
         HttpClient client = HttpClient.newBuilder().build();
 
@@ -37,24 +39,34 @@ public class GallWhiskyScraper implements Scraper<Element> {
         Elements whiskyElementsPerPage = new Elements();
         while (start == 0 || !whiskyElementsPerPage.isEmpty()) {
             String url = GALL_URL + "&start=" + start;
-            Document doc = getDocument(url, client);
 
-            Elements productGrid = doc.getElementsByClass("c-product-grid");
+            try {
+                Document doc = getDocument(url, client);
+                Elements productGrid = doc.getElementsByClass("c-product-grid");
 
-            whiskyElementsPerPage = productGrid.getFirst().getElementsByClass(WHISKY_PRODUCT_CLASS_NAME);
-            whiskyElements.addAll(whiskyElementsPerPage);
-            start += 12;
+                whiskyElementsPerPage = productGrid.getFirst().getElementsByClass(WHISKY_PRODUCT_CLASS_NAME);
+
+                whiskyElementsPerPage.stream().map(QueueItem::of).forEach(outputQueue::add);
+                start += 12;
+            } catch(InterruptedException e) {
+                Thread.currentThread().interrupt();
+            } catch(ExecutionException e) {
+                log.error(e.getCause());
+            }
+
         }
 
         client.close();
         long endTime = System.currentTimeMillis();
+        boolean sentinelAdded = false;
+        while (!sentinelAdded) {
+            sentinelAdded = outputQueue.offer(QueueItem.sentinel());
+        }
 
-        log.info("Took ~" + ((endTime - startTime) / 1000) + " seconds to scrape Gall & Gall. Found " + whiskyElements.size() + " whiskys.");
-
-        return whiskyElements;
+        log.info("Took ~ {} seconds to scrape.", ((endTime - startTime) / 1000));
     }
 
-    private static Document getDocument(String url, HttpClient client) throws InterruptedException, ExecutionException {
+    private static Document getDocument(String url, HttpClient client) throws ExecutionException, InterruptedException {
         HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).build();
         CompletableFuture<String> response = client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(HttpResponse::body);
         String body = response.get();

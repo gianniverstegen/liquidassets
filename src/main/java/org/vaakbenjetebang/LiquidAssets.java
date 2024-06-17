@@ -1,35 +1,24 @@
 package org.vaakbenjetebang;
 
+import org.vaakbenjetebang.infra.Container;
 import org.vaakbenjetebang.infra.DaggerContainer;
-import org.vaakbenjetebang.model.WhiskyProduct;
-import org.vaakbenjetebang.scraper.ScraperManager;
-import org.vaakbenjetebang.search.WhiskySuffixTrie;
+import org.vaakbenjetebang.scraper.ScrapingProcessManager;
+import org.vaakbenjetebang.userinterface.Prompt;
 
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
+import java.util.concurrent.*;
 
 public class LiquidAssets {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
-        ScraperManager scraperManager = DaggerContainer.create().getScraperManager();
-        List<WhiskyProduct> whiskyProducts = scraperManager.start();
+        Container container = DaggerContainer.create();
+        ScrapingProcessManager scrapingProcessManager = container.getScraperManager();
+        Prompt prompt = container.getPrompt();
 
-        WhiskySuffixTrie suffixTrie = new WhiskySuffixTrie();
-        suffixTrie.addAll(whiskyProducts);
+        try (ExecutorService executorService = Executors.newVirtualThreadPerTaskExecutor()) {
+            Future<?> scraping = executorService.submit(scrapingProcessManager::start);
+            Future<?> prompting = executorService.submit(prompt::startPrompt);
 
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("What whisky do you want to search for?");
-
-        String pattern = scanner.nextLine();
-
-        while (!pattern.equals("q")) {
-            List<WhiskyProduct> result = suffixTrie.search(pattern);
-
-            System.out.println("Result: ");
-            result.stream().parallel().forEach(System.out::println);
-            System.out.println("Search more? Enter q to exit");
-            pattern = scanner.nextLine();
+            scraping.get();
+            prompting.get();
         }
     }
 }

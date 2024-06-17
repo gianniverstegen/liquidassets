@@ -1,10 +1,7 @@
 package org.vaakbenjetebang.scraper.drankdozijn;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.units.qual.C;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -12,7 +9,6 @@ import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Wait;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import org.vaakbenjetebang.model.GallWhiskyProduct;
 import org.vaakbenjetebang.model.QueueItem;
 import org.vaakbenjetebang.scraper.Scraper;
 
@@ -31,12 +27,12 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
     private final static By ALLOW_COOKIE_BUTTON_IDENTIFIER = By.className("cc-allow");
     private final static By LOAD_MORE_WHISKYS_BUTTON_IDENTIFIER = By.id("morebtn");
     private final static By WHISKY_PRODUCT_IDENTIFIER = By.className("product");
-    private final static long MS_TO_SLEEP = 200L;
+    private final static long MS_TO_WAIT = 500L;
 
     @Inject
     public DrankDozijnWhiskyScraper() {
         ChromeOptions chromeOptions = new ChromeOptions();
-        chromeOptions.addArguments("--headless=new");
+//        chromeOptions.addArguments("--headless=new");
         driver = new ChromeDriver(chromeOptions);
         actions = new Actions(driver);
     }
@@ -45,7 +41,7 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
     public void scrape(BlockingQueue<QueueItem<WebElement>> outputQueue) {
         long startTime = System.currentTimeMillis();
         driver.get(URL);
-        Wait<WebDriver> wait = new WebDriverWait(driver, Duration.ofSeconds(2));
+        Wait<WebDriver> wait = new WebDriverWait(driver, Duration.ofSeconds(3));
         wait.until(ExpectedConditions.visibilityOfElementLocated(CONTINUE_TO_SITE_BUTTON_IDENTIFIER));
 
         WebElement ageVerifyButton = driver.findElement(CONTINUE_TO_SITE_BUTTON_IDENTIFIER);
@@ -64,21 +60,43 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
         while (articles.size() > oldSize) {
             oldSize = articles.size();
 
+            sleep();
             actions.sendKeys(Keys.END).perform();
-            try {
-                Thread.sleep(MS_TO_SLEEP);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
 
             List<WebElement> allCurrentVisibleArticles = driver.findElements(WHISKY_PRODUCT_IDENTIFIER);
-            articles.addAll(allCurrentVisibleArticles);
-            int sizeDifference = articles.size() - oldSize;
-            log.info("Processed {} new items. {} in total", sizeDifference, articles.size());
+
+            for (WebElement possibleNewElement : allCurrentVisibleArticles) {
+                if (!articles.contains(possibleNewElement)) {
+                    boolean added = false;
+                    while (!added) {
+                        added = outputQueue.offer(QueueItem.of(possibleNewElement));
+                    }
+                    articles.add(possibleNewElement);
+                }
+            }
+
+            if (articles.size() == oldSize) {
+                sleep();
+                actions.sendKeys(Keys.UP).perform();
+                sleep();
+                actions.sendKeys(Keys.END);
+            }
+
         }
 
         long endTime = System.currentTimeMillis();
-        log.info("Took ~" + ((endTime - startTime) / 1000) + " seconds to scrape DrankDozijn. Found " + articles.size() + " whiskys.");
-        return new ArrayList<>(articles);
+        boolean sentinelAdded = false;
+        while (!sentinelAdded) {
+            sentinelAdded = outputQueue.offer(QueueItem.sentinel());
+        }
+        log.info("Took ~" + ((endTime - startTime) / 1000) + " seconds to scrape. Found " + articles.size() + " whiskys.");
+    }
+
+    private static void sleep() {
+        try {
+            Thread.sleep(MS_TO_WAIT);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 }

@@ -20,6 +20,6 @@ public class WhiskyProduct {
 
     @Override
     public String toString() {
-        return String.format("Name: %s. Original price: %.2f. Discounted price: %.2f. Found on %s.", name, price, discountedPrice, website);
+        return String.format("%s. From: %.2f, to: %.2f at %s.", name, price, discountedPrice, website);
     }
 }
