@@ -1,12 +1,14 @@
 package org.vaakbenjetebang.infra;
 
 import dagger.Component;
-import org.vaakbenjetebang.scraper.ScraperManager;
+import org.vaakbenjetebang.scraper.ScrapingProcessManager;
+import org.vaakbenjetebang.userinterface.Prompt;
 
 import javax.inject.Singleton;
 
 @Singleton
-@Component()
+@Component(modules = UserInterfaceModule.class)
 public interface Container {
-    ScraperManager getScraperManager();
+    ScrapingProcessManager getScraperManager();
+    Prompt getPrompt();
 }
