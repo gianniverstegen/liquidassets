@@ -9,7 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class WebsiteManager<T> {
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(WebsiteManager.class);
     private final Processor<T> processor;
     private final Scraper<T> scraper;
     private final BlockingQueue<QueueItem<T>> scraperToProcessorQueue;

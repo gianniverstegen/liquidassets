@@ -22,7 +22,7 @@ public class Prompt {
     private final static int COUNTER_ROW_POSITION = 2;
     private final static int BODY_START_POSITION = 4;
     private final AtomicReference<MenuState> menuState;
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(Prompt.class);
     private final WhiskySuffixTrie trie;
     private final ScrapingState state;
     private final Screen screen;
@@ -80,9 +80,8 @@ public class Prompt {
             Future<?> inputFuture = executorService.submit(inputTask);
 
             inputFuture.get();
-            counterFuture.get();
-
             executorService.shutdownNow();
+            counterFuture.get();
         } catch (InterruptedException | ExecutionException | IOException e) {
             log.error(e);
         }

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.concurrent.*;
 
 public class ScrapingProcessManager {
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(ScrapingProcessManager.class);
     private final List<WebsiteManager<?>> websiteManagers;
     private final BlockingQueue<QueueItem<WhiskyProduct>> queue;
     private final ScrapingState state;

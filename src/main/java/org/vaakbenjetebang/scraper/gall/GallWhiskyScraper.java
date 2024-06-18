@@ -4,6 +4,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.vaakbenjetebang.model.GallWhiskyProduct;
 import org.vaakbenjetebang.model.QueueItem;
 import org.vaakbenjetebang.scraper.Scraper;
 
@@ -23,7 +24,7 @@ import java.util.concurrent.ExecutionException;
 
 public class GallWhiskyScraper implements Scraper<Element> {
 
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(GallWhiskyScraper.class);
     private final static String GALL_URL = "https://www.gall.nl/whisky/?prefn1=actions&prefv1=Acties%20voor%20Premium%7CActies%20voor%20iedereen";
     private final static String WHISKY_PRODUCT_CLASS_NAME = "ptile";
 
