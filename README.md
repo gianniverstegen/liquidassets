@@ -3,6 +3,7 @@
 A Java-based application for scraping large whiskey vendors to quickly query discounted whiskeys across multiple vendors. 
 Currently, interaction is limited through the terminal. Querying is possible as the scraping process is ongoing.
 
+Demo:
 [![Watch the video](https://raw.githubusercontent.com/gianniverstegen/liquidassets/main/video/thumbnail.png)](https://raw.githubusercontent.com/gianniverstegen/liquidassets/main/video/demo.mov)
 
 ### Current Features
