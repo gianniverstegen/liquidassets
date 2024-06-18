@@ -21,13 +21,13 @@ import java.util.concurrent.BlockingQueue;
 public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
     private final WebDriver driver;
     private final Actions actions;
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(DrankDozijnWhiskyScraper.class);
     private final static String URL = "https://drankdozijn.nl/aanbiedingen/whisky";
     private final static By CONTINUE_TO_SITE_BUTTON_IDENTIFIER = By.name("naar_drankdozijn");
     private final static By ALLOW_COOKIE_BUTTON_IDENTIFIER = By.className("cc-allow");
     private final static By LOAD_MORE_WHISKYS_BUTTON_IDENTIFIER = By.id("morebtn");
     private final static By WHISKY_PRODUCT_IDENTIFIER = By.className("product");
-    private final static long MS_TO_WAIT = 500L;
+    private final static long MS_TO_WAIT = 1000L;
 
     @Inject
     public DrankDozijnWhiskyScraper() {
@@ -77,9 +77,10 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
 
             if (articles.size() == oldSize) {
                 sleep();
-                actions.sendKeys(Keys.UP).perform();
+                actions.sendKeys(Keys.PAGE_UP).perform();
                 sleep();
-                actions.sendKeys(Keys.END);
+                actions.sendKeys(Keys.PAGE_UP).perform();
+                oldSize = -1;
             }
 
         }

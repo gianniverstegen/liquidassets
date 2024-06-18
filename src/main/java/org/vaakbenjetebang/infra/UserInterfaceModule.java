@@ -17,10 +17,10 @@ public class UserInterfaceModule {
     @Singleton
     Screen getScreen() {
         try {
-            Terminal terminal = new DefaultTerminalFactory().createSwingTerminal();
+            Terminal terminal = new DefaultTerminalFactory().createTerminal();
             return new TerminalScreen(terminal);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to instantiate terminal");
+            throw new RuntimeException("Failed to instantiate terminal: \n" + e);
         }
     }
 }

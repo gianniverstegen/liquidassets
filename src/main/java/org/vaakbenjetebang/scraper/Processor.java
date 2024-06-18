@@ -11,7 +11,7 @@ import java.util.concurrent.BlockingQueue;
 
 public abstract class Processor<T> {
 
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(Processor.class);
     public void process(BlockingQueue<QueueItem<T>> inputQueue, BlockingQueue<QueueItem<WhiskyProduct>> outputQueue) {
         long startTime = System.currentTimeMillis();
         boolean running = true;

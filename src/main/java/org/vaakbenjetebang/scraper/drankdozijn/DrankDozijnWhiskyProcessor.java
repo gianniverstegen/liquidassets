@@ -18,7 +18,7 @@ import java.util.concurrent.BlockingQueue;
 
 public class DrankDozijnWhiskyProcessor extends Processor<WebElement> {
 
-    private final static Logger log = LogManager.getLogger();
+    private final static Logger log = LogManager.getLogger(DrankDozijnWhiskyProcessor.class);
 
     @Inject
     public DrankDozijnWhiskyProcessor() {}

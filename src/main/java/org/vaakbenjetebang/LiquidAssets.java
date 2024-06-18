@@ -17,8 +17,9 @@ public class LiquidAssets {
             Future<?> scraping = executorService.submit(scrapingProcessManager::start);
             Future<?> prompting = executorService.submit(prompt::startPrompt);
 
-            scraping.get();
             prompting.get();
+            executorService.shutdownNow();
+            scraping.get();
         }
     }
 }
