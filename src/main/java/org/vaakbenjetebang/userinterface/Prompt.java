@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Prompt {
 
-    private final static long MS_TO_WAIT = 100L;
+    private final static long MS_TO_WAIT = 50L;
     private final static int START_STRING_COLUMN_POSITION = 2;
     private final static int COUNTER_ROW_POSITION = 2;
     private final static int BODY_START_POSITION = 4;
