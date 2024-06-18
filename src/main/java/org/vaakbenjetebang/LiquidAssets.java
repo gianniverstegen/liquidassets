@@ -18,8 +18,8 @@ public class LiquidAssets {
             Future<?> prompting = executorService.submit(prompt::startPrompt);
 
             prompting.get();
-            executorService.shutdownNow();
-            scraping.get();
+            scraping.cancel(true);
+            executorService.shutdown();
         }
     }
 }
