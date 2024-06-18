@@ -27,12 +27,12 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
     private final static By ALLOW_COOKIE_BUTTON_IDENTIFIER = By.className("cc-allow");
     private final static By LOAD_MORE_WHISKYS_BUTTON_IDENTIFIER = By.id("morebtn");
     private final static By WHISKY_PRODUCT_IDENTIFIER = By.className("product");
-    private final static long MS_TO_WAIT = 1000L;
+    private final static long MS_TO_WAIT = 700L;
 
     @Inject
     public DrankDozijnWhiskyScraper() {
         ChromeOptions chromeOptions = new ChromeOptions();
-//        chromeOptions.addArguments("--headless=new");
+        chromeOptions.addArguments("--headless=new");
         driver = new ChromeDriver(chromeOptions);
         actions = new Actions(driver);
     }
@@ -61,8 +61,6 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
             oldSize = articles.size();
 
             sleep();
-            actions.sendKeys(Keys.END).perform();
-
             List<WebElement> allCurrentVisibleArticles = driver.findElements(WHISKY_PRODUCT_IDENTIFIER);
 
             for (WebElement possibleNewElement : allCurrentVisibleArticles) {
@@ -75,14 +73,9 @@ public class DrankDozijnWhiskyScraper implements Scraper<WebElement> {
                 }
             }
 
-            if (articles.size() == oldSize) {
-                sleep();
-                actions.sendKeys(Keys.PAGE_UP).perform();
-                sleep();
-                actions.sendKeys(Keys.PAGE_UP).perform();
-                oldSize = -1;
-            }
-
+            WebElement element = allCurrentVisibleArticles.getLast();
+            actions.scrollToElement(element).perform();
+            actions.sendKeys(Keys.PAGE_DOWN).perform();
         }
 
         long endTime = System.currentTimeMillis();
